@@ -1,0 +1,11 @@
+* {
+    box-sizing: border-box;
+}
+
+#what[contenteditable="true"] {
+    background: #DDD;
+    border-bottom: 2px dotted #000;
+    display: inline-block;
+    min-width: 100px;
+    height: 1em;
+}
