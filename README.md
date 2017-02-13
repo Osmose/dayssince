@@ -1,6 +1,6 @@
 # DaysSince
 
-Track the number of days since something happened via LocalStorage.
+Track the number of days since something happened via localstorage.
 
 ## License & Copyright
 
