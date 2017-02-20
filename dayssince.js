@@ -16,6 +16,7 @@ Vue.component('incident-list', {
     'onResetIncident',
     'onDeleteIncident',
     'validateIncident',
+    'onMoveIncident',
   ],
 
   data() {
@@ -26,13 +27,15 @@ Vue.component('incident-list', {
 
   template: `
     <ul class="incident-list">
-      <incident-list-item
-        v-for="incident in incidents"
-        :key="incident.description"
-        :incident="incident"
-        :on-reset="onResetIncident"
-        :on-delete="onDeleteIncident"
-      />
+      <draggable :list="incidents" @update="handleMoveIncident">
+        <incident-list-item
+          v-for="incident in incidents"
+          :key="incident.description"
+          :incident="incident"
+          :on-reset="onResetIncident"
+          :on-delete="onDeleteIncident"
+        />
+      </draggable>
       <li v-if="!showNewForm" @click="handleClickAddNew" class="add-new">
         <div><span>+</span> Add New</div>
       </li>
@@ -57,6 +60,10 @@ Vue.component('incident-list', {
     handleSubmitNew(incident) {
       this.onCreateNewIncident(incident);
       this.showNewForm = false;
+    },
+
+    handleMoveIncident(event) {
+      this.onMoveIncident(event.oldIndex, event.newIndex);
     },
   },
 });
@@ -161,6 +168,7 @@ const app = new Vue({
         :on-create-new-incident="handleCreateNewIncident"
         :on-reset-incident="handleResetIncident"
         :on-delete-incident="handleDeleteIncident"
+        :on-move-incident="handleMoveIncident"
       />
     `,
 
@@ -201,6 +209,17 @@ const app = new Vue({
           });
         }
         localStorage.incidents = JSON.stringify(savedIncidents);
-      }
+      },
+
+      handleMoveIncident(fromIndex, toIndex) {
+        if (fromIndex === toIndex) {
+          return;
+        } else if (toIndex > fromIndex) {
+          toIndex--;
+        }
+        const incident = this.incidents.splice(fromIndex, 1)[0];
+        this.incidents.splice(toIndex, 0, incident);
+        this.saveIncidents();
+      },
     },
 });
