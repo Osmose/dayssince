@@ -25,7 +25,7 @@ Vue.component('incident-list', {
   },
 
   template: `
-    <ul>
+    <ul class="incident-list">
       <incident-list-item
         v-for="incident in incidents"
         :key="incident.description"
@@ -33,12 +33,13 @@ Vue.component('incident-list', {
         :on-reset="onResetIncident"
         :on-delete="onDeleteIncident"
       />
-      <li v-if="!showNewForm" @click="handleClickAddNew">
-        Add new
+      <li v-if="!showNewForm" @click="handleClickAddNew" class="add-new">
+        <div><span>+</span> Add New</div>
       </li>
       <incident-form
         v-else
         :on-submit="handleSubmitNew"
+        :on-cancel="handleCancelNew"
         :validate-incident="validateIncident"
       />
     </ul>
@@ -49,6 +50,10 @@ Vue.component('incident-list', {
       this.showNewForm = true;
     },
 
+    handleCancelNew() {
+      this.showNewForm = false;
+    },
+
     handleSubmitNew(incident) {
       this.onCreateNewIncident(incident);
       this.showNewForm = false;
@@ -57,7 +62,7 @@ Vue.component('incident-list', {
 });
 
 Vue.component('incident-form', {
-  props: ['incident', 'onSubmit', 'validateIncident'],
+  props: ['incident', 'onSubmit', 'validateIncident', 'onCancel'],
 
   data() {
     let data = {
@@ -77,15 +82,20 @@ Vue.component('incident-form', {
   template: `
     <li>
       <form @submit="handleSubmit">
-        <h2>
-          It has been
-          <input type="text" class="field" v-model.number="days" size="2">
-          days since
-          <input type="text" class="field" v-model.trim="description">
-          .
-        </h2>
+        <div class="minor">It has been</div>
+        <div class="days"><input type="text" class="field" v-model.number="days" size="2"> days</div>
+        <div class="minor">since</div>
+        <div class="description">
+          <div
+            class="field"
+            ref="description"
+            @keydown.13="handleSubmit"
+            contenteditable
+          ></div>
+        </div>
         <div v-if="error" class="error">{{ this.error }}</div>
         <button type="submit">Save</button>
+        <button type="button" @click="onCancel">Cancel</button>
       </form>
     </li>
   `,
@@ -95,7 +105,7 @@ Vue.component('incident-form', {
       event.preventDefault();
       const incidentDate = new Date();
       incidentDate.setDate(incidentDate.getDate() - this.days);
-      const incident = new Incident(this.description, incidentDate);
+      const incident = new Incident(this.$refs.description.textContent, incidentDate);
 
       this.error = this.validateIncident(incident);
       if (!this.error) {
@@ -110,7 +120,10 @@ Vue.component('incident-list-item', {
 
   template: `
     <li>
-      <h2>It has been {{ incident.daysSince() }} days since {{ incident.description }}.</h2>
+      <div class="minor">It has been</div>
+      <div class="days">{{ incident.daysSince() }} days</div>
+      <div class="minor">since</div>
+      <div class="description">{{ incident.description }}.</div>
       <button @click="handleClickReset">Reset</button>
       <button @click="handleClickDelete">Delete</button>
     </li>
