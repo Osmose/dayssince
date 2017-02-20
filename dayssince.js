@@ -27,7 +27,7 @@ Vue.component('incident-list', {
 
   template: `
     <ul class="incident-list">
-      <draggable :list="incidents" @update="handleMoveIncident">
+      <draggable :list="incidents.slice()" @update="handleMoveIncident">
         <incident-list-item
           v-for="incident in incidents"
           :key="incident.description"
@@ -214,9 +214,8 @@ const app = new Vue({
       handleMoveIncident(fromIndex, toIndex) {
         if (fromIndex === toIndex) {
           return;
-        } else if (toIndex > fromIndex) {
-          toIndex--;
         }
+
         const incident = this.incidents.splice(fromIndex, 1)[0];
         this.incidents.splice(toIndex, 0, incident);
         this.saveIncidents();
